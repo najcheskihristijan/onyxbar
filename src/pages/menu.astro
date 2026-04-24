@@ -5,42 +5,42 @@ const cocktails = [
     spirits: "Bourbon",
     build: ["Bourbon", "Demerara sugar", "Angostura bitters", "Orange peel"],
     note: "Stirred. Neat. Unhurried.",
-    image: "https://images.unsplash.com/photo-1582056509381-33e11b85733f?w=1600&q=80",
+    image: "https://images.unsplash.com/photo-1582056509381-33e11b85733f?w=1000&q=80",
   },
   {
     name: "Negroni",
     spirits: "Gin",
     build: ["Gin", "Campari", "Sweet vermouth", "Orange twist"],
     note: "Bitter, ritualistic.",
-    image: "https://images.unsplash.com/photo-1752141930096-ac8292d6a15a?w=1600&q=80",
+    image: "https://images.unsplash.com/photo-1752141930096-ac8292d6a15a?w=1000&q=80",
   },
   {
     name: "Penicillin",
     spirits: "Scotch",
     build: ["Blended Scotch", "Islay float", "Honey-ginger syrup", "Lemon"],
     note: "Smoke on the tongue.",
-    image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=1600&q=80",
+    image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=1000&q=80",
   },
   {
     name: "Espresso Martini",
     spirits: "Vodka",
     build: ["Vodka", "Fresh espresso", "Coffee liqueur", "Cane sugar"],
     note: "Awake and dressed.",
-    image: "https://images.unsplash.com/photo-1678261738794-163c056a1d6f?w=1600&q=80",
+    image: "https://images.unsplash.com/photo-1678261738794-163c056a1d6f?w=1000&q=80",
   },
   {
     name: "Manhattan",
     spirits: "Rye",
     build: ["Rye whiskey", "Sweet vermouth", "Angostura bitters", "Brandied cherry"],
     note: "The classic, done cold.",
-    image: "https://images.unsplash.com/photo-1621873495884-845a939892d1?w=1600&q=80",
+    image: "https://images.unsplash.com/photo-1621873495884-845a939892d1?w=1000&q=80",
   },
   {
     name: "Onyx",
     spirits: "House",
     build: ["Black gin", "Activated charcoal", "Dry vermouth", "Lemon oil"],
     note: "The house signature.",
-    image: "https://images.unsplash.com/photo-1693409166438-fc92119a0060?w=1600&q=80",
+    image: "https://images.unsplash.com/photo-1693409166438-fc92119a0060?w=1000&q=80",
   },
 ];
 
@@ -111,7 +111,7 @@ const canvasWidthVw = FIRST_X + (cocktails.length - 1) * GAP + TAIL;
         position: absolute;
         top: 50%;
         left: var(--x);
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate3d(-50%, -50%, 0) scale(1);
         width: min(34vw, 420px);
         display: flex;
         flex-direction: column;
@@ -120,6 +120,7 @@ const canvasWidthVw = FIRST_X + (cocktails.length - 1) * GAP + TAIL;
         text-align: center;
         will-change: opacity, transform;
         opacity: 0;
+        backface-visibility: hidden;
       }
       @media (max-width: 768px) {
         .item { width: 70vw; }
@@ -130,13 +131,20 @@ const canvasWidthVw = FIRST_X + (cocktails.length - 1) * GAP + TAIL;
         aspect-ratio: 3 / 4;
         overflow: hidden;
         border-radius: 2px;
-        box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+        position: relative;
+        background: #111;
+      }
+      .frame::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(10,10,10,0.15);
+        pointer-events: none;
       }
       .frame img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        filter: saturate(0.9) brightness(0.92);
         display: block;
       }
 
@@ -208,7 +216,7 @@ const canvasWidthVw = FIRST_X + (cocktails.length - 1) * GAP + TAIL;
           const drift = d * -10; // px, items drift opposite scroll direction a touch
 
           item.style.opacity = opacity.toFixed(3);
-          item.style.transform = `translate(calc(-50% + ${drift}px), -50%) scale(${scale.toFixed(3)})`;
+          item.style.transform = `translate3d(calc(-50% + ${drift.toFixed(1)}px), -50%, 0) scale(${scale.toFixed(3)})`;
         }
         ticking = false;
       }
