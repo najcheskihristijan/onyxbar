@@ -1,0 +1,163 @@
+---
+const cocktails = [
+  {
+    name: "Old Fashioned",
+    spirits: "Bourbon",
+    build: ["Bourbon", "Demerara sugar", "Angostura bitters", "Orange peel"],
+    note: "Stirred. Neat. Unhurried.",
+  },
+  {
+    name: "Negroni",
+    spirits: "Gin",
+    build: ["Gin", "Campari", "Sweet vermouth", "Orange twist"],
+    note: "Bitter, ritualistic.",
+  },
+  {
+    name: "Penicillin",
+    spirits: "Scotch",
+    build: ["Blended Scotch", "Islay float", "Honey-ginger syrup", "Lemon"],
+    note: "Smoke on the tongue.",
+  },
+  {
+    name: "Espresso Martini",
+    spirits: "Vodka",
+    build: ["Vodka", "Fresh espresso", "Coffee liqueur", "Cane sugar"],
+    note: "Awake and dressed.",
+  },
+  {
+    name: "Manhattan",
+    spirits: "Rye",
+    build: ["Rye whiskey", "Sweet vermouth", "Angostura bitters", "Brandied cherry"],
+    note: "The classic, done cold.",
+  },
+  {
+    name: "Onyx",
+    spirits: "House",
+    build: ["Black gin", "Activated charcoal", "Dry vermouth", "Lemon oil"],
+    note: "The house signature.",
+  },
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Onyx Bar — Menu</title>
+    <meta name="description" content="Onyx Bar — cocktail menu." />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+  </head>
+  <body>
+    <div class="track">
+      {cocktails.map((c, i) => (
+        <section class="card">
+          <span class="num">{String(i + 1).padStart(2, "0")} / {String(cocktails.length).padStart(2, "0")}</span>
+          <span class="spirits">{c.spirits}</span>
+          <h1 class="name">{c.name}</h1>
+          <ul class="build">
+            {c.build.map((line) => <li>{line}</li>)}
+          </ul>
+          <p class="note">{c.note}</p>
+        </section>
+      ))}
+    </div>
+
+    <style is:global>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        height: 100%;
+        overflow: hidden;
+        background: #0a0a0a;
+      }
+      body {
+        color: #f5f5f5;
+        font-family: Georgia, "Times New Roman", serif;
+      }
+      .track {
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+      }
+      .track::-webkit-scrollbar { display: none; }
+      .card {
+        flex: 0 0 100vw;
+        height: 100vh;
+        display: grid;
+        place-items: center;
+        scroll-snap-align: start;
+        padding: 4rem;
+        text-align: center;
+        position: relative;
+      }
+      .num {
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 0.85rem;
+        letter-spacing: 0.2em;
+        color: #666;
+      }
+      .spirits {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        font-size: 0.85rem;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        color: #b48a3c;
+      }
+      .card > *:nth-child(n+3) { grid-row: auto; }
+      .card .name {
+        font-size: clamp(3rem, 10vw, 8rem);
+        font-weight: 400;
+        font-style: italic;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        margin: 0;
+      }
+      .card .build {
+        list-style: none;
+        margin-top: 2rem;
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+        line-height: 2;
+        letter-spacing: 0.05em;
+        color: #ccc;
+      }
+      .card .note {
+        margin-top: 2rem;
+        font-style: italic;
+        font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+        color: #888;
+        max-width: 30ch;
+      }
+      .card > .num, .card > .spirits { position: absolute; }
+
+      /* center the actual content column */
+      .card {
+        grid-template-rows: 1fr auto auto auto 1fr;
+      }
+      .card .name { grid-row: 2; }
+      .card .build { grid-row: 3; }
+      .card .note { grid-row: 4; }
+    </style>
+
+    <script>
+      const track = document.querySelector('.track');
+      if (track) {
+        track.addEventListener('wheel', (e) => {
+          if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            e.preventDefault();
+            track.scrollBy({ left: e.deltaY, behavior: 'auto' });
+          }
+        }, { passive: false });
+      }
+    </script>
+  </body>
+</html>
