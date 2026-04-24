@@ -2,4 +2,15 @@ node_modules
 dist
 .astro
 .env
+.env.*
 .DS_Store
+
+# stray documents / assets that shouldn't end up in the repo
+*.pdf
+*.xlsx
+*.xls
+*.docx
+*.doc
+*.key
+*.pem
+*.zip
