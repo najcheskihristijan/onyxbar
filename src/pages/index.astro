@@ -11,24 +11,36 @@
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
   </head>
   <body>
-    <section class="letter"><span>O</span></section>
-    <section class="letter"><span>N</span></section>
-    <section class="letter"><span>Y</span></section>
-    <section class="letter"><span>X</span></section>
+    <div class="track">
+      <section class="letter"><span>O</span></section>
+      <section class="letter"><span>N</span></section>
+      <section class="letter"><span>Y</span></section>
+      <section class="letter"><span>X</span></section>
+    </div>
 
     <style is:global>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      html {
-        scroll-snap-type: y mandatory;
+      html, body {
         height: 100%;
+        overflow: hidden;
+        background: #0a0a0a;
       }
       body {
-        background: #0a0a0a;
         color: #ffffff;
         font-family: Georgia, "Times New Roman", serif;
-        min-height: 100%;
       }
+      .track {
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+      }
+      .track::-webkit-scrollbar { display: none; }
       .letter {
+        flex: 0 0 100vw;
         height: 100vh;
         display: grid;
         place-items: center;
@@ -41,5 +53,19 @@
         user-select: none;
       }
     </style>
+
+    <script>
+      // Translate vertical wheel (mouse users) into horizontal scroll.
+      // Trackpad two-finger horizontal + touch swipe already work natively.
+      const track = document.querySelector('.track');
+      if (track) {
+        track.addEventListener('wheel', (e) => {
+          if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            e.preventDefault();
+            track.scrollBy({ left: e.deltaY, behavior: 'auto' });
+          }
+        }, { passive: false });
+      }
+    </script>
   </body>
 </html>
