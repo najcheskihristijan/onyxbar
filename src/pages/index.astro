@@ -31,6 +31,34 @@ const sections = [
       {sections.map(() => <div class="snap"></div>)}
     </div>
 
+    <!-- UI overlay: position dots + first-time swipe hint (metaball loader) -->
+    <div class="ui">
+      <div class="hint" id="hint" aria-hidden="true">
+        <svg class="l1" viewBox="0 0 200 200" width="56" height="56">
+          <defs>
+            <filter id="goo1" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+              <feColorMatrix in="blur" type="matrix"
+                values="1 0 0 0 0
+                        0 1 0 0 0
+                        0 0 1 0 0
+                        0 0 0 22 -11" result="goo"/>
+              <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+            </filter>
+          </defs>
+          <g filter="url(#goo1)" fill="#f4f4f1">
+            <g class="core"><circle cx="100" cy="100" r="22"/></g>
+            <g class="orbit o1"><g transform="translate(100,42)"><circle class="b1" r="14"/></g></g>
+            <g class="orbit o2"><g transform="translate(100,30)"><circle class="b2" r="11"/></g></g>
+            <g class="orbit o3"><g transform="translate(100,55)"><circle class="b3" r="9"/></g></g>
+          </g>
+        </svg>
+      </div>
+      <div class="dots" id="dots">
+        {sections.map((_, i) => <span class="dot" data-i={i}></span>)}
+      </div>
+    </div>
+
     <style is:global>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body { height: 100%; overflow: hidden; background: #0a0a0a; }
@@ -70,12 +98,69 @@ const sections = [
       }
       .track::-webkit-scrollbar { display: none; }
       .snap { flex: 0 0 100vw; height: 100vh; scroll-snap-align: start; }
+
+      .ui {
+        position: fixed;
+        bottom: 1.6rem;
+        left: 0;
+        right: 0;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.9rem;
+        pointer-events: none;
+      }
+      .hint {
+        opacity: 0.85;
+        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+        transition: opacity 0.6s ease;
+        line-height: 0;
+      }
+      .hint.gone { opacity: 0; }
+      .hint svg { display: block; overflow: visible; }
+      .l1 .core  { transform-origin: 100px 100px; animation: l1-core 4.2s ease-in-out infinite; }
+      .l1 .orbit { transform-origin: 100px 100px; }
+      .l1 .o1 { animation: l1-spin 3.6s linear infinite; }
+      .l1 .o2 { animation: l1-spin 5.4s linear infinite reverse; }
+      .l1 .o3 { animation: l1-spin 4.5s linear infinite; }
+      .l1 .b1 { animation: l1-pulse-a 2.4s ease-in-out infinite; transform-origin: center; }
+      .l1 .b2 { animation: l1-pulse-b 3.1s ease-in-out infinite; transform-origin: center; }
+      .l1 .b3 { animation: l1-pulse-c 2.7s ease-in-out infinite; transform-origin: center; }
+      @keyframes l1-spin { to { transform: rotate(360deg); } }
+      @keyframes l1-core {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        50%      { transform: scale(1.08) rotate(180deg); }
+      }
+      @keyframes l1-pulse-a { 0%,100% { transform: scale(0.55); } 50% { transform: scale(1.0); } }
+      @keyframes l1-pulse-b { 0%,100% { transform: scale(0.95); } 50% { transform: scale(0.5); } }
+      @keyframes l1-pulse-c { 0%,100% { transform: scale(0.7);  } 50% { transform: scale(1.05); } }
+      .dots {
+        display: flex;
+        gap: 0.55rem;
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.35);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        transition: background 0.25s ease, transform 0.25s ease, width 0.25s ease;
+      }
+      .dot.active {
+        background: #fff;
+        width: 18px;
+        border-radius: 3px;
+      }
     </style>
 
     <script>
       const track = document.getElementById('track') as HTMLDivElement;
       const layers = Array.from(document.querySelectorAll<HTMLElement>('.layer'));
+      const dots = Array.from(document.querySelectorAll<HTMLElement>('.dot'));
+      const hint = document.getElementById('hint') as HTMLElement;
       let ticking = false;
+      let hintHidden = false;
 
       function update() {
         const vw = window.innerWidth;
@@ -94,6 +179,14 @@ const sections = [
             img.style.opacity = opacity.toFixed(3);
             img.style.filter = `saturate(${sat}) brightness(${bri})`;
           }
+        }
+        const activeIndex = Math.round(progress);
+        for (const dot of dots) {
+          dot.classList.toggle('active', Number(dot.dataset.i) === activeIndex);
+        }
+        if (!hintHidden && progress > 0.05) {
+          hintHidden = true;
+          hint.classList.add('gone');
         }
         ticking = false;
       }
