@@ -1,0 +1,129 @@
+---
+const sections = [
+  { faded: "/home/1.jpg", vivid: "/home/2.jpg" },
+  { faded: "/home/3.jpg", vivid: "/home/4.jpg" },
+  { faded: "/home/5.jpg", vivid: "/home/6.jpg" },
+  { faded: "/home/7.jpg", vivid: "/home/7.jpg" },
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Onyx Bar — Crossfade</title>
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+  </head>
+  <body>
+    <!-- Fixed image stack (what you actually see) -->
+    <div class="stage">
+      {sections.map((s, i) => (
+        <div class="layer" data-i={i}>
+          <img class="faded" src={s.faded} alt="" loading={i < 2 ? "eager" : "lazy"} decoding="async" />
+          {s.faded !== s.vivid && (
+            <img class="vivid" src={s.vivid} alt="" loading={i < 2 ? "eager" : "lazy"} decoding="async" />
+          )}
+        </div>
+      ))}
+    </div>
+
+    <!-- Invisible scroll spacer that drives progress 0..N-1 -->
+    <div class="track" id="track">
+      {sections.map(() => <div class="snap"></div>)}
+    </div>
+
+    <style is:global>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        height: 100%;
+        overflow: hidden;
+        background: #0a0a0a;
+      }
+      body { color: #fff; font-family: Georgia, serif; }
+
+      .stage {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background: #0a0a0a;
+      }
+      .layer {
+        position: absolute;
+        inset: 0;
+      }
+      .layer img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+        user-select: none;
+        -webkit-user-drag: none;
+        backface-visibility: hidden;
+        opacity: 0;
+        will-change: opacity;
+      }
+
+      .track {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+      }
+      .track::-webkit-scrollbar { display: none; }
+      .snap {
+        flex: 0 0 100vw;
+        height: 100vh;
+        scroll-snap-align: start;
+      }
+    </style>
+
+    <script>
+      const track = document.getElementById('track') as HTMLDivElement;
+      const layers = Array.from(document.querySelectorAll<HTMLElement>('.layer'));
+      let ticking = false;
+
+      function update() {
+        const vw = window.innerWidth;
+        const progress = track.scrollLeft / vw; // 0..N-1
+        for (const layer of layers) {
+          const i = Number(layer.dataset.i);
+          const d = Math.abs(progress - i); // 0 = active, 1 = next door
+          // faded layer: linear crossfade across one section width
+          const fadedOpacity = Math.max(0, 1 - d);
+          // vivid layer: only emerges when very near rest
+          const vividOpacity = Math.pow(Math.max(0, 1 - d * 2.2), 2);
+          const fadedImg = layer.querySelector<HTMLImageElement>('.faded');
+          const vividImg = layer.querySelector<HTMLImageElement>('.vivid');
+          if (fadedImg) fadedImg.style.opacity = fadedOpacity.toFixed(3);
+          if (vividImg) vividImg.style.opacity = vividOpacity.toFixed(3);
+        }
+        ticking = false;
+      }
+
+      function request() {
+        if (!ticking) { ticking = true; requestAnimationFrame(update); }
+      }
+
+      track.addEventListener('scroll', request, { passive: true });
+      window.addEventListener('resize', request);
+
+      track.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          e.preventDefault();
+          track.scrollBy({ left: e.deltaY, behavior: 'auto' });
+        }
+      }, { passive: false });
+
+      requestAnimationFrame(update);
+      window.addEventListener('load', update);
+    </script>
+  </body>
+</html>
